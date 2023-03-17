@@ -23,6 +23,7 @@ def discriminator_loss(logits_real, logits_fake):
     #          YOUR CODE HERE          #
     ####################################
     
+    loss = bce_loss(lo)
     
     ##########       END      ##########
     
