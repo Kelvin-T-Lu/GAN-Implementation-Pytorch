@@ -1,4 +1,5 @@
 import torch
+from torch.autograd import Variable
 from torch.nn.functional import binary_cross_entropy_with_logits as bce_loss
 
 def discriminator_loss(logits_real, logits_fake):
@@ -17,13 +18,14 @@ def discriminator_loss(logits_real, logits_fake):
     - loss: PyTorch Tensor containing (scalar) the loss for the discriminator.
     """
     
-    loss = None
-    
     ####################################
     #          YOUR CODE HERE          #
     ####################################
+    loss = None
+    X , _ = logits_real.size()
     
-    loss = bce_loss(lo)
+    loss = (bce_loss(logits_real.view(X), Variable(torch.ones(X)).type(torch.FloatTensor)) +
+            bce_loss(logits_fake.view(X), Variable(torch.zeros(X)).type(torch.FloatTensor)))
     
     ##########       END      ##########
     
@@ -49,7 +51,9 @@ def generator_loss(logits_fake):
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    
+    X, _ = logits_fake.size()
+    loss = bce_loss(logits_fake.view(X), Variable(
+        torch.ones(X)).type(torch.FloatTensor))
     
     ##########       END      ##########
     
@@ -73,7 +77,11 @@ def ls_discriminator_loss(scores_real, scores_fake):
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    
+    X, _ = scores_real.size()
+    loss_real = 0.5*torch.mean(torch.pow(scores_real -
+                               Variable(torch.ones(X)).type(torch.FloatTensor), 2))
+    loss_fake = 0.5*torch.mean(torch.pow(scores_fake, 2))
+    loss = loss_real + loss_fake
     
     ##########       END      ##########
     
@@ -95,7 +103,9 @@ def ls_generator_loss(scores_fake):
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    
+    X, _ = scores_fake.size()
+    loss = 0.5*torch.mean(torch.pow(scores_fake -
+                          Variable(torch.ones(X)).type(torch.FloatTensor), 2))
     
     ##########       END      ##########
     

@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
+from torch.autograd import Variable
+import torch
+
 from gan.utils import sample_noise, show_images, deprocess_img, preprocess_img
 
 def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_every=250, 
@@ -53,19 +56,48 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             # in these variables for logging and visualization below
             d_error = None
             g_error = None
-            fake_images = None
+            fake_img = None
             
+          # TODO - https://github.com/Lornatang/GAN-PyTorch/blob/master/train.py
+          # TODO - https://github.com/WangLuning/CS498-intro-deep-learning/blob/master/Assignment4/gan/losses.py
             ####################################
             #          YOUR CODE HERE          #
             ####################################
-            
+            # init the grad of discriminator
+            D_solver.zero_grad()
+            # real images
+            real_data = Variable(real_images).type(torch.FloatTensor)
+            logits_real = D(2* (real_data - 0.5)).type(torch.FloatTensor)
+
+            g_false_seed = Variable(sample_noise(batch_size, noise_size)).type(torch.FloatTensor)
+            fake_img = G(g_false_seed).detach()
+            logit_false = D(fake_img.view(batch_size, 1, 28, 28))
+
+            # calculate the discriminator and improve the discriminator network
+            d_error = discriminator_loss(logits_real, logit_false)
+            d_error.backward()        
+            D_solver.step()
+
+            ####################################
+
+            # start improving the generator network
+            G_solver.zero_grad()
+            g_false_seed = Variable(sample_noise(batch_size, noise_size)).type(torch.FloatTensor)
+            # generate a fake image to feed into discriminator network
+            fake_img = G(g_false_seed)
+
+            gen_logits_fake = D(fake_img.view(batch_size, 1, 28, 28))
+            # improve generator model
+            g_error = generator_loss(gen_logits_fake)
+            g_error.backward()
+            G_solver.step()
             
             ##########       END      ##########
             
             # Logging and output visualization
             if (iter_count % show_every == 0):
                 print('Iter: {}, D: {:.4}, G:{:.4}'.format(iter_count,d_error.item(),g_error.item()))
-                disp_fake_images = deprocess_img(fake_images.data)  # denormalize
+                disp_fake_images = deprocess_img(fake_img.data)  # denormalize
                 imgs_numpy = (disp_fake_images).cpu().numpy()
                 show_images(imgs_numpy[0:16], color=input_channels!=1)
                 plt.show()
