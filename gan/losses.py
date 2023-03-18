@@ -1,6 +1,6 @@
 import torch
 from torch.autograd import Variable
-from torch.nn.functional import binary_cross_entropy_with_logits as bce_loss
+from torch.nn.functional import binary_cross_entropy_with_logits as bce_loss, mse_loss
 
 def discriminator_loss(logits_real, logits_fake):
     """
@@ -22,11 +22,11 @@ def discriminator_loss(logits_real, logits_fake):
     #          YOUR CODE HERE          #
     ####################################
     loss = None
-    X , _ = logits_real.size()
-    
-    loss = (bce_loss(logits_real.view(X), Variable(torch.ones(X)).type(torch.FloatTensor)) +
-            bce_loss(logits_fake.view(X), Variable(torch.zeros(X)).type(torch.FloatTensor)))
-    
+    real_loss = bce_loss(logits_real, torch.ones(
+        logits_real.shape).cuda().detach(), reduction='mean')
+    fake_loss = bce_loss(
+        1 - logits_fake, torch.ones(logits_fake.shape).cuda().detach(), reduction='mean')
+    loss = (real_loss+fake_loss)/2
     ##########       END      ##########
     
     return loss
@@ -48,12 +48,11 @@ def generator_loss(logits_fake):
     
     loss = None
     
+
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    X, _ = logits_fake.size()
-    loss = bce_loss(logits_fake.view(X), Variable(
-        torch.ones(X)).type(torch.FloatTensor))
+    loss = bce_loss(logits_fake, torch.ones(logits_fake.shape).cuda().detach(), reduction= 'mean')
     
     ##########       END      ##########
     
@@ -77,11 +76,11 @@ def ls_discriminator_loss(scores_real, scores_fake):
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    X, _ = scores_real.size()
-    loss_real = 0.5*torch.mean(torch.pow(scores_real -
-                               Variable(torch.ones(X)).type(torch.FloatTensor), 2))
-    loss_fake = 0.5*torch.mean(torch.pow(scores_fake, 2))
-    loss = loss_real + loss_fake
+    real_loss = mse_loss(scores_real, torch.ones(
+        scores_real.shape).cuda().detach(), reduction='mean')
+    fake_loss = mse_loss(
+        1 - scores_fake, torch.ones(scores_fake.shape).cuda().detach(), reduction='mean')
+    loss = (real_loss+fake_loss)/2
     
     ##########       END      ##########
     
@@ -103,10 +102,8 @@ def ls_generator_loss(scores_fake):
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    X, _ = scores_fake.size()
-    loss = 0.5*torch.mean(torch.pow(scores_fake -
-                          Variable(torch.ones(X)).type(torch.FloatTensor), 2))
-    
+    loss = mse_loss(scores_fake, torch.ones(
+        scores_fake.shape).cuda().detach(), reduction='mean')
     ##########       END      ##########
     
     return loss

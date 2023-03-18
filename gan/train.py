@@ -60,17 +60,19 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             
           # TODO - https://github.com/Lornatang/GAN-PyTorch/blob/master/train.py
           # TODO - https://github.com/WangLuning/CS498-intro-deep-learning/blob/master/Assignment4/gan/losses.py
+          # TODO - https://github.com/HaoranTang/Intro-Deep-Learning/blob/main/mp4/GAN/losses.py
             ####################################
             #          YOUR CODE HERE          #
             ####################################
             # init the grad of discriminator
             D_solver.zero_grad()
             # real images
-            real_data = Variable(real_images).type(torch.FloatTensor)
-            logits_real = D(2* (real_data - 0.5)).type(torch.FloatTensor)
+            # real_data = Variable(real_images).type(torch.FloatTensor)
+            # logits_real = D(real_images).type(torch.FloatTensor).to(device)
+            logits_real = D(real_images).to(device)
 
-            g_false_seed = Variable(sample_noise(batch_size, noise_size)).type(torch.FloatTensor)
-            fake_img = G(g_false_seed).detach()
+            g_false_seed = sample_noise(batch_size, noise_size).to(device)
+            fake_img = G(g_false_seed).detach().to(device)
             logit_false = D(fake_img.view(batch_size, 1, 28, 28))
 
             # calculate the discriminator and improve the discriminator network
@@ -82,7 +84,8 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
 
             # start improving the generator network
             G_solver.zero_grad()
-            g_false_seed = Variable(sample_noise(batch_size, noise_size)).type(torch.FloatTensor)
+            # g_false_seed = Variable(sample_noise(batch_size, noise_size)).type(torch.FloatTensor)
+            g_false_seed = sample_noise(batch_size, noise_size).to(device)
             # generate a fake image to feed into discriminator network
             fake_img = G(g_false_seed)
 
