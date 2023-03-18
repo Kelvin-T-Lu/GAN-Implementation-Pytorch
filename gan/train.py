@@ -7,7 +7,7 @@ import torch
 from gan.utils import sample_noise, show_images, deprocess_img, preprocess_img
 
 def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_every=250, 
-              batch_size=128, noise_size=100, num_epochs=10, train_loader=None, device=None):
+              batch_size=128, noise_size=100, num_epochs=10, train_loader=None, device=None, img_resolution= 128):
     """
     Train loop for GAN.
     
@@ -48,7 +48,7 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
     for epoch in range(num_epochs):
         print('EPOCH: ', (epoch+1))
         for x, _ in train_loader:
-            _, input_channels, img_size, _ = x.shape
+            _, input_channels, img_resolution, _ = x.shape
             
             real_images = preprocess_img(x).to(device)  # normalize
             
@@ -56,7 +56,7 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             # in these variables for logging and visualization below
             d_error = None
             g_error = None
-            fake_img = None
+            fake_images = None
             
           # TODO - https://github.com/Lornatang/GAN-PyTorch/blob/master/train.py
           # TODO - https://github.com/WangLuning/CS498-intro-deep-learning/blob/master/Assignment4/gan/losses.py
@@ -64,34 +64,29 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             ####################################
             #          YOUR CODE HERE          #
             ####################################
-            # init the grad of discriminator
+            
+            # Zero Gradiant & Sample noise init
             D_solver.zero_grad()
-            # real images
-            # real_data = Variable(real_images).type(torch.FloatTensor)
-            # logits_real = D(real_images).type(torch.FloatTensor).to(device)
-            logits_real = D(real_images).to(device)
+            noise = sample_noise(batch_size, noise_size).to(device)
+            
+            # Discriminator output for real and fake data
+            fake_images = G(noise).to(device).detach()
+            logits_fake = D(fake_images.view(batch_size, 1, img_resolution, img_resolution))
+            logits_real = D(real_images)
 
-            g_false_seed = sample_noise(batch_size, noise_size).to(device)
-            fake_img = G(g_false_seed).detach().to(device)
-            logit_false = D(fake_img.view(batch_size, 1, 28, 28))
-
-            # calculate the discriminator and improve the discriminator network
-            d_error = discriminator_loss(logits_real, logit_false)
-            d_error.backward()        
+            # Compute discriminator loss and step w/ optimizer
+            d_error = discriminator_loss(logits_real, logits_fake)
+            d_error.backward()
             D_solver.step()
 
-            ####################################
-
-            # start improving the generator network
+            # Zero Gradiant & Sample noise init
             G_solver.zero_grad()
-            # g_false_seed = Variable(sample_noise(batch_size, noise_size)).type(torch.FloatTensor)
-            g_false_seed = sample_noise(batch_size, noise_size).to(device)
-            # generate a fake image to feed into discriminator network
-            fake_img = G(g_false_seed)
-
-            gen_logits_fake = D(fake_img.view(batch_size, 1, 28, 28))
-            # improve generator model
-            g_error = generator_loss(gen_logits_fake)
+            noise = sample_noise(batch_size, noise_size).to(device)
+            
+            # Compute Generator output
+            fake_images = G(noise).to(device)
+            logits_fake = D(fake_images.view(batch_size, 1, img_resolution, img_resolution))
+            g_error = generator_loss(logits_fake)
             g_error.backward()
             G_solver.step()
             
@@ -100,7 +95,7 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             # Logging and output visualization
             if (iter_count % show_every == 0):
                 print('Iter: {}, D: {:.4}, G:{:.4}'.format(iter_count,d_error.item(),g_error.item()))
-                disp_fake_images = deprocess_img(fake_img.data)  # denormalize
+                disp_fake_images = deprocess_img(fake_images.data)  # denormalize
                 imgs_numpy = (disp_fake_images).cpu().numpy()
                 show_images(imgs_numpy[0:16], color=input_channels!=1)
                 plt.show()
