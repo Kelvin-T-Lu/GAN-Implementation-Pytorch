@@ -3,8 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-./MNISTT_data
-./celeba_data
+./MNISTT_data/*
+./celeba_data/*
 
 # C extensions
 *.so
