@@ -31,6 +31,18 @@ class SpectralNorm(nn.Module):
               3: Calculate w with the spectral norm.
               4: Use setattr to update w in the module.
         """
+
+        u = getattr(self.module, self.name + "_u")
+        v = getattr(self.module, self.name + "_v")
+        w = getattr(self.module, self.name + "_bar")
+
+        size = w.data.shape[0]
+        for _ in range(self.power_iterations):
+            v.data = l2normalize(torch.mv(torch.t(w.view(size, -1).data), u.data))
+            u.data = l2normalize(torch.mv(w.view(size, -1).data, v.data))
+
+        sigma = u.dot(w.view(size, -1).mv(v))
+        setattr(self.module, self.name, w / sigma.expand_as(w))
         
 
 
