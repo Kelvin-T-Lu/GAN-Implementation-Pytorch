@@ -61,6 +61,7 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
           # TODO - https://github.com/Lornatang/GAN-PyTorch/blob/master/train.py
           # TODO - https://github.com/WangLuning/CS498-intro-deep-learning/blob/master/Assignment4/gan/losses.py
           # TODO - https://github.com/HaoranTang/Intro-Deep-Learning/blob/main/mp4/GAN/losses.py
+          # TODO - https://github.com/amanchadha/stanford-cs231n-assignments-2020/blob/master/assignment3/cs231n/gan_pytorch.py
             ####################################
             #          YOUR CODE HERE          #
             ####################################
