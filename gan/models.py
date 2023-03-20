@@ -69,7 +69,7 @@ class Generator(torch.nn.Module):
         x = torch.nn.functional.relu(self.bn1(self.conv1(x)))
         x = torch.nn.functional.relu(self.bn2(self.conv2(x)))
         x = torch.nn.functional.relu(self.bn3(self.conv3(x)))
-        x = torch.nn.funcitonal.relu(self.bn4(self.conv4(x)))
+        x = torch.nn.functional.relu(self.bn4(self.conv4(x)))
         x = torch.tanh(self.conv5(x))
         
         ##########       END      ##########
