@@ -4,12 +4,10 @@ import matplotlib.gridspec as gridspec
 from torch.autograd import Variable
 import torch
 
-
 from gan.utils import sample_noise, show_images, deprocess_img, preprocess_img
 
-dtype = torch.cuda.FloatTensor
 def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_every=250, 
-              batch_size=128, noise_size=100, num_epochs=10, train_loader=None, device=None):
+              batch_size=128, noise_size=100, num_epochs=10, train_loader=None, device=None, img_resolution= 128):
     """
     Train loop for GAN.
     
@@ -69,39 +67,27 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             ####################################
             
             # Zero Gradiant & Sample noise init
-            if len(x) != batch_size:
-                continue
             D_solver.zero_grad()
-            real_data = x.type(dtype)
-            logits_real = D(real_images).type(dtype)
-              
-            g_fake_seed = sample_noise(batch_size, noise_size).type(dtype)
-            # if iter_count == 0: 
-            g_fake_seed = g_fake_seed.view(batch_size, noise_size, 1, 1)
-            # else: 
-              # g_fake_seed = g_fake_seed.view(batch_size, input_channels, img_resolution, img_resolution)
+            noise = sample_noise(batch_size, noise_size).to(device)
+            
+            # Discriminator output for real and fake data
+            fake_images = G(noise).to(device).detach()
+            logits_fake = D(fake_images.view(batch_size, 1, img_resolution, img_resolution))
+            logits_real = D(real_images)
 
-            # print(g_fake_seed.size)
-            fake_images = G(g_fake_seed).detach()
-            logits_fake = D(fake_images.view(batch_size, input_channels, img_resolution, img_resolution))
-
-        
+            # Compute discriminator loss and step w/ optimizer
             d_error = discriminator_loss(logits_real, logits_fake)
-            d_error = torch.autograd.Variable(d_error, requires_grad = True)
-            d_error.backward()        
+            d_error.backward()
             D_solver.step()
 
+            # Zero Gradiant & Sample noise init
             G_solver.zero_grad()
-            g_fake_seed = sample_noise(batch_size, noise_size).type(dtype)
-            # if iter_count == 0: 
-              # print(iter_count)
-            # g_fake_seed = g_fake_seed.view(batch_size, noise_size, 1, 1)
-            # else: 
-              # g_fake_seed = g_fake_seed.view(batch_size, input_channels, img_resolution, img_resolution)
-            fake_images = G(g_fake_seed)
-
-            gen_logits_fake = D(fake_images.view(batch_size, input_channels, img_resolution, img_resolution))
-            g_error = generator_loss(gen_logits_fake)
+            noise = sample_noise(batch_size, noise_size).to(device)
+            
+            # Compute Generator output
+            fake_images = G(noise).to(device)
+            logits_fake = D(fake_images.view(batch_size, 1, img_resolution, img_resolution))
+            g_error = generator_loss(logits_fake)
             g_error.backward()
             G_solver.step()
             
