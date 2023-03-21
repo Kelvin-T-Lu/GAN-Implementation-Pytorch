@@ -74,17 +74,30 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             D_solver.zero_grad()
             real_data = x.type(dtype)
             logits_real = D(real_images).type(dtype)
-
+              
             g_fake_seed = sample_noise(batch_size, noise_size).type(dtype)
+            # if iter_count == 0: 
+            g_fake_seed = g_fake_seed.view(batch_size, noise_size, 1, 1)
+            # else: 
+              # g_fake_seed = g_fake_seed.view(batch_size, input_channels, img_resolution, img_resolution)
+
+            # print(g_fake_seed.size)
             fake_images = G(g_fake_seed).detach()
             logits_fake = D(fake_images.view(batch_size, input_channels, img_resolution, img_resolution))
 
+        
             d_error = discriminator_loss(logits_real, logits_fake)
+            d_error = torch.autograd.Variable(d_error, requires_grad = True)
             d_error.backward()        
             D_solver.step()
 
             G_solver.zero_grad()
             g_fake_seed = sample_noise(batch_size, noise_size).type(dtype)
+            # if iter_count == 0: 
+              # print(iter_count)
+            # g_fake_seed = g_fake_seed.view(batch_size, noise_size, 1, 1)
+            # else: 
+              # g_fake_seed = g_fake_seed.view(batch_size, input_channels, img_resolution, img_resolution)
             fake_images = G(g_fake_seed)
 
             gen_logits_fake = D(fake_images.view(batch_size, input_channels, img_resolution, img_resolution))

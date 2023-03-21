@@ -66,6 +66,7 @@ class Generator(torch.nn.Module):
         ####################################
         #          YOUR CODE HERE          #
         ####################################
+        # x = x.view(128, self.noise_dim , 1, 1)
         x = torch.nn.functional.relu(self.bn1(self.conv1(x)))
         x = torch.nn.functional.relu(self.bn2(self.conv2(x)))
         x = torch.nn.functional.relu(self.bn3(self.conv3(x)))
