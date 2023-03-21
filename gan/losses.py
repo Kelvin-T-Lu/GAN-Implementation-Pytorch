@@ -1,6 +1,7 @@
 import torch
 from torch.autograd import Variable
-from torch.nn.functional import binary_cross_entropy_with_logits as bce_loss, mse_loss
+from torch.nn.functional import binary_cross_entropy_with_logits as bce_loss
+from torch.nn.functional import mse_loss
 
 def discriminator_loss(logits_real, logits_fake):
     """
