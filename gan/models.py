@@ -1,6 +1,20 @@
 import torch
 from gan.spectral_normalization import SpectralNorm
 
+class Unflatten(nn.Module):
+    """
+    An Unflatten module receives an input of shape (N, C*H*W) and reshapes it
+    to produce an output of shape (N, C, H, W).
+    """
+    def __init__(self, N=-1, C=128, H=7, W=7):
+        super(Unflatten, self).__init__()
+        self.N = N
+        self.C = C
+        self.H = H
+        self.W = W
+    def forward(self, x):
+        return x.view(self.N, self.C, self.H, self.W)
+        
 class Discriminator(torch.nn.Module):
     def __init__(self, input_channels=3):
         super(Discriminator, self).__init__()
