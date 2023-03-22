@@ -26,15 +26,11 @@ class Discriminator(torch.nn.Module):
         ####################################
         #          YOUR CODE HERE          #
         ####################################
-        self.conv1 = SpectralNorm(torch.nn.Conv2d(3, 128, kernel_size = 4, stride = 2, padding = 1))
-        self.conv2 = SpectralNorm(torch.nn.Conv2d(128, 256, kernel_size = 4, stride = 2, padding = 1))
-        self.bn1 = torch.nn.BatchNorm2d(256)
-        self.conv3 = SpectralNorm(torch.nn.Conv2d(256, 512, kernel_size = 4, stride = 2, padding = 1))
-        self.bn2 = torch.nn.BatchNorm2d(512)
-        self.conv4 = SpectralNorm(torch.nn.Conv2d(512, 1024, kernel_size = 4, stride = 2, padding = 1))
-        self.bn3 = torch.nn.BatchNorm2d(1024)
-        self.conv5 = SpectralNorm(torch.nn.Conv2d(1024, 1, kernel_size = 4, stride = 1, padding = 1))
-        self.leaky_relu = torch.nn.LeakyReLU(0.2)
+        x = self.leaky_relu(self.conv1(x), 0.2)
+        x = self.leaky_relu(self.bn1(self.conv2(x)), 0.2)
+        x = self.leaky_relu(self.bn2(self.conv3(x)), 0.2)
+        x = self.leaky_relu(self.bn3(self.conv4(x)), 0.2)
+        x = self.conv5(x)
         
         ##########       END      ##########
         
@@ -69,10 +65,11 @@ class Generator(torch.nn.Module):
         # x = x.view(128, self.noise_dim , 1, 1)
         # j, k = x.size()
         # x = x.reshape(j, k)
-        x = torch.nn.functional.leaky_relu(self.bn1(self.conv1(x)), 0.2)
-        x = torch.nn.functional.leaky_relu(self.bn2(self.conv2(x)), 0.2)
-        x = torch.nn.functional.leaky_relu(self.bn3(self.conv3(x)), 0.2)
-        x = torch.nn.functional.leaky_relu(self.bn4(self.conv4(x)), 0.2)
+
+        x = torch.nn.functional.relu(self.bn1(self.conv1(x)))
+        x = torch.nn.functional.relu(self.bn2(self.conv2(x)))
+        x = torch.nn.functional.relu(self.bn3(self.conv3(x)))
+        x = torch.nn.functional.relu(self.bn4(self.conv4(x)))
         x = torch.tanh(self.conv5(x))
         
         ##########       END      ##########
