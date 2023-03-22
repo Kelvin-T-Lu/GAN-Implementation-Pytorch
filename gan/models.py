@@ -67,10 +67,12 @@ class Generator(torch.nn.Module):
         #          YOUR CODE HERE          #
         ####################################
         # x = x.view(128, self.noise_dim , 1, 1)
-        x = torch.nn.functional.relu(self.bn1(self.conv1(x)))
-        x = torch.nn.functional.relu(self.bn2(self.conv2(x)))
-        x = torch.nn.functional.relu(self.bn3(self.conv3(x)))
-        x = torch.nn.functional.relu(self.bn4(self.conv4(x)))
+        # j, k = x.size()
+        # x = x.reshape(j, k)
+        x = torch.nn.functional.leaky_relu(self.bn1(self.conv1(x)), 0.2)
+        x = torch.nn.functional.leaky_relu(self.bn2(self.conv2(x)), 0.2)
+        x = torch.nn.functional.leaky_relu(self.bn3(self.conv3(x)), 0.2)
+        x = torch.nn.functional.leaky_relu(self.bn4(self.conv4(x)), 0.2)
         x = torch.tanh(self.conv5(x))
         
         ##########       END      ##########
