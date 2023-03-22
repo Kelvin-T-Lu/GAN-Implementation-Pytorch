@@ -3,7 +3,7 @@ from gan.spectral_normalization import SpectralNorm
 
 class Discriminator(torch.nn.Module):
     def __init__(self, input_channels=3):
-        super(Discriminator, self).__init__()
+        super().__init__()
         
         #Hint: Hint: Apply spectral normalization to convolutional layers. Input to SpectralNorm should be your conv nn module
         ####################################
@@ -39,7 +39,7 @@ class Discriminator(torch.nn.Module):
 
 class Generator(torch.nn.Module):
     def __init__(self, noise_dim, output_channels=3):
-        super(Generator, self).__init__()    
+        super().__init__()    
         self.noise_dim = noise_dim
         
         ####################################
