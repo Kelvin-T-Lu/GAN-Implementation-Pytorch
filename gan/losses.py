@@ -103,8 +103,8 @@ def ls_generator_loss(scores_fake):
     ####################################
     #          YOUR CODE HERE          #
     ####################################
-    loss = mse_loss(scores_fake, torch.ones(
-        scores_fake.shape).cuda().detach(), reduction='mean')
+    loss = mse_loss(scores_fake, 
+    torch.ones(scores_fake.shape).cuda().detach(), reduction='mean')
     ##########       END      ##########
     
     return loss
