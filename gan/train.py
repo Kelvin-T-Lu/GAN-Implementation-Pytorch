@@ -68,12 +68,12 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             
             # Zero Gradiant & Sample noise init
             D_solver.zero_grad()
-            noise = sample_noise(batch_size, noise_size).to(device)
+            logits_real = D(real_images)
             
             # Discriminator output for real and fake data
-            fake_images = G(noise).to(device).detach()
-            logits_fake = D(fake_images.view(batch_size, 1, img_resolution, img_resolution))
-            logits_real = D(real_images)
+            noise = sample_noise(batch_size, noise_size).to(device)
+            fake_images = G(noise).to(device)
+            logits_fake = D(fake_images.view(batch_size, input_channels, img_resolution, img_resolution))
 
             # Compute discriminator loss and step w/ optimizer
             d_error = discriminator_loss(logits_real, logits_fake)
@@ -86,8 +86,9 @@ def train(D, G, D_solver, G_solver, discriminator_loss, generator_loss, show_eve
             
             # Compute Generator output
             fake_images = G(noise).to(device)
-            logits_fake = D(fake_images.view(batch_size, 1, img_resolution, img_resolution))
+            logits_fake = D(fake_images.view(batch_size, input_channels, img_resolution, img_resolution))
             g_error = generator_loss(logits_fake)
+            # g_error.requires_grad = True
             g_error.backward()
             G_solver.step()
             
