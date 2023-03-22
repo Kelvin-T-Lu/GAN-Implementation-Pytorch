@@ -26,10 +26,10 @@ class Discriminator(torch.nn.Module):
         ####################################
         #          YOUR CODE HERE          #
         ####################################
-        x = self.leaky_relu(self.conv1(x), 0.2)
-        x = self.leaky_relu(self.bn1(self.conv2(x)), 0.2)
-        x = self.leaky_relu(self.bn2(self.conv3(x)), 0.2)
-        x = self.leaky_relu(self.bn3(self.conv4(x)), 0.2)
+        x = self.leaky_relu(self.conv1(x))
+        x = self.leaky_relu(self.bn1(self.conv2(x)))
+        x = self.leaky_relu(self.bn2(self.conv3(x)))
+        x = self.leaky_relu(self.bn3(self.conv4(x)))
         x = self.conv5(x)
         
         ##########       END      ##########

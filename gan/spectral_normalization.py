@@ -17,7 +17,7 @@ class SpectralNorm(nn.Module):
         Reference:
         SPECTRAL NORMALIZATION FOR GENERATIVE ADVERSARIAL NETWORKS: https://arxiv.org/pdf/1802.05957.pdf
         """
-        super(SpectralNorm, self).__init__()
+        super().__init__()
         self.module = module
         self.name = name
         self.power_iterations = power_iterations
